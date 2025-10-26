@@ -16,7 +16,7 @@
   register: zone_info_results
 
 - name: Fetch DNS records per zone (loop via include_tasks)
-  include_tasks: "{{ role_path }}/tasks/fetch_dns_records_per_zone.yml"
+  include_tasks: "{{ role_path }}/tasks/fetch_single_zone.yml"
   loop: "{{ zone_info_results.results }}"
   loop_control:
     loop_var: zone_item
@@ -24,3 +24,4 @@
     zone_id: "{{ zone_item.json.result[0].id }}"
     zone_name: "{{ zone_item.item.zone }}"
     max_pages: "{{ max_pages }}"
+
