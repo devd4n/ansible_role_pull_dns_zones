@@ -9,11 +9,11 @@
   set_fact:
     fetch_task_file: >-
       {% if dns_provider == 'cloudflare' %}
-      saas_cloudflare_fetch_zone.yml
+      {{ role_path }}/tasks/saas_cloudflare_fetch_zone.yml
       {% elif dns_provider == 'route53' %}
-      aws_route53_fetch_zone.yml
+      {{ role_path }}/tasks/aws_route53_fetch_zone.yml
       {% else %}
-      saas_cloudflare_fetch_zone.yml
+      {{ role_path }}/tasks/saas_cloudflare_fetch_zone.yml
       {% endif %}
 
 - name: Fetch all zones and DNS records based on provider
