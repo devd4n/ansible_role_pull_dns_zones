@@ -2,7 +2,7 @@
 # tasks file for ansible_role_pull_dns_zones
 
 - name: Include Cloudflare fetch tasks
-  include_tasks: "{{ role_path }}/tasks/saas_cloudflare_fetch_zone.yml"
+  include_tasks: "{{ role_path }}/tasks/saas_cloudflare_fetch_zones.yml"
   when: dns_provider == "cloudflare"
 
 - name: Generate DNS block and update inventory
