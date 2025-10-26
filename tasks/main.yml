@@ -5,10 +5,9 @@
   set_fact:
     dns_block: "{{ dns_block_start + '\n' }}"
 
-- name: Include provider-specific fetch tasks
-  include_tasks: "{{ fetch_task_file }}"
-  vars:
-    fetch_task_file: >-
+- name: Determine fetch task file based on dns_provider
+  set_fact:
+    fetch_task_file: >
       {% if dns_provider == 'cloudflare' %}
       {{ role_path }}/tasks/saas_cloudflare_fetch_zone.yml
       {% elif dns_provider == 'route53' %}
