@@ -16,7 +16,7 @@
   register: zone_info_results
 
 - name: Fetch DNS records per zone (loop via include_tasks)
-  include_tasks: "{{ role_path }}/tasks/fetch_single_zone.yml"
+  include_tasks: "{{ role_path }}/tasks/saas_cloudflare_fetch_single_zone.yml"
   loop: "{{ zone_info_results.results }}"
   loop_control:
     loop_var: zone_item
