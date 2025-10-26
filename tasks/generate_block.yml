@@ -1,15 +1,6 @@
-- name: Append zone and entries to DNS block fact
-  set_fact:
-    dns_block: >-
-      {{
-        (dns_block | default(dns_block_start + "\n")) +
-        "- zone: " + zone_item.zone + "\n  dns_entries:\n" +
-        (cf_entries | map('regex_replace', '^(.*)$', '  - { name: "\\1.name", type: "\\1.type", value: "\\1.content" }') | join('\n')) + "\n"
-      }}
-
 - name: Close DNS block
   set_fact:
-    dns_block: "{{ dns_block + '\n' + dns_block_end }}"
+    dns_block: "{{ dns_block + dns_block_end }}"
 
 - name: Replace DNS block in inventory file
   replace:
@@ -20,4 +11,5 @@
 - name: Debug output
   debug:
     msg: "DNS block in {{ inventory_file }} has been updated."
+
 
