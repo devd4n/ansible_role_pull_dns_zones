@@ -1,15 +1,25 @@
+- name: Initialize DNS block
+  set_fact:
+    dns_block: "{{ dns_block_start + '\n' }}"
+
+- name: Generate DNS block from all_cf_entries
+  set_fact:
+    dns_block: >-
+      {{
+        dns_block +
+        (all_cf_entries | map('regex_replace', '^(.*)$', 'BLOCK_PLACEHOLDER') | join('\n'))
+      }}
+  vars:
+    # Hier wird die eigentliche Umwandlung in Inventory-Format gemacht
+    dns_block: |
+      {% for zone in all_cf_entries %}
+      - zone: {{ zone.zone }}
+        dns_entries:
+      {% for entry in zone.dns_entries %}
+        - { name: "{{ entry.name }}", type: "{{ entry.type }}", value: "{{ entry.content }}" }
+      {% endfor %}
+      {% endfor %}
+
 - name: Close DNS block
   set_fact:
     dns_block: "{{ dns_block + dns_block_end }}"
-
-- name: Replace DNS block in inventory file
-  replace:
-    path: "{{ inventory_file }}"
-    regexp: "(?s){{ dns_block_start }}.*{{ dns_block_end }}"
-    replace: "{{ dns_block }}"
-
-- name: Debug output
-  debug:
-    msg: "DNS block in {{ inventory_file }} has been updated."
-
-

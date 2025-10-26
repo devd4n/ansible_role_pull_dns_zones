@@ -1,11 +1,13 @@
-- name: Iterate over all zones
+- name: Initialize all_cf_entries
   set_fact:
-    dns_block_tmp: "{{ dns_block | default('') }}"
+    all_cf_entries: []
+
+- name: Iterate over all zones
   loop: "{{ dns_zones }}"
   loop_control:
     loop_var: zone_item
-
   block:
+
     - name: Retrieve Cloudflare Zone ID
       uri:
         url: "{{ cloudflare_api_base }}?name={{ zone_item.zone }}"
@@ -50,13 +52,6 @@
             page: "{{ page + 1 }}"
             more_pages: "{{ dns_page.json.result | length == per_page }}"
 
-    - name: Append zone and entries to DNS block
+    - name: Add zone and its entries to all_cf_entries
       set_fact:
-        dns_block: >-
-          {{
-            dns_block_tmp +
-            "- zone: " + zone_item.zone + "\n  dns_entries:\n" +
-            (cf_entries | map('regex_replace', '^(.*)$', '  - { name: "\\1.name", type: "\\1.type", value: "\\1.content" }') | join('\n')) + "\n"
-          }}
-      vars:
-        dns_block_tmp: "{{ dns_block }}"
+        all_cf_entries: "{{ all_cf_entries + [ { 'zone': zone_item.zone, 'dns_entries': cf_entries } ] }}"
