@@ -2,15 +2,18 @@
   set_fact:
     all_cf_entries: []
 
-- name: Iterate over all zones
-  loop: "{{ dns_zones }}"
-  loop_control:
-    loop_var: zone_item
+- name: Fetch DNS records for each zone
   block:
+    - name: Iterate over zones
+      set_fact:
+        current_zone: "{{ item }}"
+      loop: "{{ dns_zones }}"
+      loop_control:
+        loop_var: item
 
     - name: Retrieve Cloudflare Zone ID
       uri:
-        url: "{{ cloudflare_api_base }}?name={{ zone_item.zone }}"
+        url: "{{ cloudflare_api_base }}?name={{ current_zone.zone }}"
         method: GET
         headers:
           Authorization: "Bearer {{ api_token }}"
@@ -23,7 +26,7 @@
       set_fact:
         zone_id: "{{ zone_info.json.result[0].id }}"
 
-    - name: Initialize pagination variables
+    - name: Initialize pagination
       set_fact:
         cf_entries: []
         page: 1
@@ -52,6 +55,6 @@
             page: "{{ page + 1 }}"
             more_pages: "{{ dns_page.json.result | length == per_page }}"
 
-    - name: Add zone and its entries to all_cf_entries
+    - name: Add zone records to all_cf_entries
       set_fact:
-        all_cf_entries: "{{ all_cf_entries + [ { 'zone': zone_item.zone, 'dns_entries': cf_entries } ] }}"
+        all_cf_entries: "{{ all_cf_entries + [ { 'zone': current_zone.zone, 'dns_entries': cf_entries } ] }}"
