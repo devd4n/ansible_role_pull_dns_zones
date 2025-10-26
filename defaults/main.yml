@@ -8,3 +8,4 @@ dns_block_start: "# START SYNC DNS"
 dns_block_end: "# END SYNC DNS"
 dns_provider: "cloudflare"  # Standard: cloudflare
 api_token: ""
+max_pages: 10  # maximale Seiten pro Zone

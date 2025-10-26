@@ -2,59 +2,25 @@
   set_fact:
     all_cf_entries: []
 
-- name: Fetch DNS records for each zone
-  block:
-    - name: Iterate over zones
-      set_fact:
-        current_zone: "{{ item }}"
-      loop: "{{ dns_zones }}"
-      loop_control:
-        loop_var: item
+- name: Fetch Cloudflare Zone IDs
+  uri:
+    url: "{{ cloudflare_api_base }}?name={{ item.zone }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ api_token }}"
+      Content-Type: "application/json"
+    return_content: yes
+  loop: "{{ dns_zones }}"
+  loop_control:
+    loop_var: item
+  register: zone_info_results
 
-    - name: Retrieve Cloudflare Zone ID
-      uri:
-        url: "{{ cloudflare_api_base }}?name={{ current_zone.zone }}"
-        method: GET
-        headers:
-          Authorization: "Bearer {{ api_token }}"
-          Content-Type: "application/json"
-        return_content: yes
-      register: zone_info
-      failed_when: zone_info.status not in [200, 201]
-
-    - name: Set Zone ID
-      set_fact:
-        zone_id: "{{ zone_info.json.result[0].id }}"
-
-    - name: Initialize pagination
-      set_fact:
-        cf_entries: []
-        page: 1
-        more_pages: true
-
-    - name: Retrieve DNS records page by page
-      while: more_pages
-      block:
-        - name: Fetch one page of DNS records
-          uri:
-            url: "{{ cloudflare_api_base }}/{{ zone_id }}/dns_records?per_page={{ per_page }}&page={{ page }}"
-            method: GET
-            headers:
-              Authorization: "Bearer {{ api_token }}"
-              Content-Type: "application/json"
-            return_content: yes
-          register: dns_page
-          failed_when: dns_page.status not in [200, 201]
-
-        - name: Append records to cf_entries
-          set_fact:
-            cf_entries: "{{ cf_entries + dns_page.json.result }}"
-
-        - name: Check if more pages exist
-          set_fact:
-            page: "{{ page + 1 }}"
-            more_pages: "{{ dns_page.json.result | length == per_page }}"
-
-    - name: Add zone records to all_cf_entries
-      set_fact:
-        all_cf_entries: "{{ all_cf_entries + [ { 'zone': current_zone.zone, 'dns_entries': cf_entries } ] }}"
+- name: Fetch DNS records per zone (loop via include_tasks)
+  include_tasks: "{{ role_path }}/tasks/fetch_dns_records_per_zone.yml"
+  loop: "{{ zone_info_results.results }}"
+  loop_control:
+    loop_var: zone_item
+  vars:
+    zone_id: "{{ zone_item.json.result[0].id }}"
+    zone_name: "{{ zone_item.item.zone }}"
+    max_pages: "{{ max_pages }}"
