@@ -1,0 +1,44 @@
+- name: Retrieve Cloudflare Zone ID
+  uri:
+    url: "{{ cloudflare_api_base }}?name={{ zone_item.zone }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ api_token }}"
+      Content-Type: "application/json"
+    return_content: yes
+  register: zone_info
+  failed_when: zone_info.status not in [200, 201]
+
+- name: Set Zone ID
+  set_fact:
+    zone_id: "{{ zone_info.json.result[0].id }}"
+
+- name: Initialize pagination variables
+  set_fact:
+    cf_entries: []
+    page: 1
+    more_pages: true
+
+- name: Retrieve DNS records page by page
+  while: more_pages
+  block:
+    - name: Fetch one page of DNS records
+      uri:
+        url: "{{ cloudflare_api_base }}/{{ zone_id }}/dns_records?per_page={{ per_page }}&page={{ page }}"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ api_token }}"
+          Content-Type: "application/json"
+        return_content: yes
+      register: dns_page
+      failed_when: dns_page.status not in [200, 201]
+
+    - name: Append records to cf_entries
+      set_fact:
+        cf_entries: "{{ cf_entries + dns_page.json.result }}"
+
+    - name: Check if more pages exist
+      set_fact:
+        page: "{{ page + 1 }}"
+        more_pages: "{{ dns_page.json.result | length == per_page }}"
+

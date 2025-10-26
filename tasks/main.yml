@@ -1,0 +1,26 @@
+---
+# tasks file for ansible_role_pull_dns_zones
+
+- name: Initialize DNS block
+  set_fact:
+    dns_block: "{{ dns_block_start + '\n' }}"
+
+- name: Determine fetch task file based on dns_provider
+  set_fact:
+    fetch_task_file: >-
+      {% if dns_provider == 'cloudflare' %}
+      saas_cloudflare_fetch_zone.yml
+      {% elif dns_provider == 'route53' %}
+      aws_route53_fetch_zone.yml
+      {% else %}
+      saas_cloudflare_fetch_zone.yml
+      {% endif %}
+
+- name: Fetch all zones and DNS records based on provider
+  include_tasks: "{{ fetch_task_file }}"
+  loop: "{{ dns_zones }}"
+  loop_control:
+    loop_var: zone_item
+
+- name: Generate DNS block and update inventory
+  include_tasks: generate_block.yml
