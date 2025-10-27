@@ -19,9 +19,9 @@
 - name: Generate DNS YAML block with dynamic indentation
   set_fact:
     dns_block: |
-      {{ dns_block_start_marker }}
+      {{ dns_block_start }}
       {{ cf_zones | to_nice_yaml(indent=dns_block_indent, width=999) | indent(dns_block_indent) }}
-      {{ dns_block_end_marker }}
+      {{ dns_block_end }}
 
 - name: Show generated DNS block
   debug:
@@ -30,7 +30,7 @@
 - name: Replace DNS block in inventory file
   replace:
     path: "{{ inventory_file }}"
-    regexp: "(?s){{ dns_block_start_marker }}.*{{ dns_block_end_marker }}"
+    regexp: "(?s){{ dns_block_start }}.*{{ dns_block_end }}"
     replace: "{{ dns_block }}"
     backup: true
     diff: true
