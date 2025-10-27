@@ -23,5 +23,4 @@
   vars:
     zone_id: "{{ zone_item.json.result[0].id }}"
     zone_name: "{{ zone_item.item.zone }}"
-    max_pages: "{{ max_pages }}"
 
