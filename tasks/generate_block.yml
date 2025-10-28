@@ -80,7 +80,7 @@
 
 - name: Parse replaced inventory text into YAML
   set_fact:
-    inventory_data: "{{ inventory_with_new_dns | from_yaml }}"
+    inventory_data: "{{ inventory_text | from_yaml }}"
 
 - name: Write formatted inventory back to file
   copy:
