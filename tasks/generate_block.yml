@@ -23,7 +23,7 @@
 
 - name: Write indentation of DNS block to variable
   set_fact:    
-    target: "{{ input | regex_replace([\s]*dns_block_start, '\\1') }}"
+    target: "{{ input | regex_replace('[\s]*dns_block_start', '\\1') }}"
 
 - debug:
   msg: "{{target }}"
