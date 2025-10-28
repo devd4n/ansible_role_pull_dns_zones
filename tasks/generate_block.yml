@@ -7,14 +7,19 @@
   set_fact:
     inventory_text: "{{ inventory_raw.content | b64decode }}"
 
-- name: Determine indentation of DNS block
+#- name: Determine indentation of DNS block
+#  set_fact:
+#    dns_block_indent: >-
+#      {{
+#        (inventory_text
+#         | regex_search('^([ \\t]*)' ~ dns_block_start, '\\1', multiline=True)
+#        ) | default('') | length
+#      }}
+
+- name: Determine indentation of DNS block safely
   set_fact:
-    dns_block_indent: >-
-      {{
-        (inventory_text
-         | regex_search('^([ \\t]*)' ~ dns_block_start, '\\1', multiline=True)
-        ) | default('') | length
-      }}
+    indent_matches: "{{ inventory_text | regex_findall('^([ \t]*)' ~ dns_block_start, multiline=True) }}"
+    dns_block_indent: "{{ indent_matches[0] | length if indent_matches | length > 0 else 0 }}"
 
 - name: Generate DNS YAML block with dynamic indentation
   set_fact:
