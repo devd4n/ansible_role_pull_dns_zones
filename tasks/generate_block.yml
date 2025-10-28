@@ -29,7 +29,7 @@
   set_fact:
     dns_block: |
       {{ dns_block_start }}
-      {{ cf_zones | to_nice_yaml(indent=(dns_block_indent|int|default(2)), width=999) | indent(dns_block_indent) }}
+      {{ all_cf_entries | to_nice_yaml(indent=(dns_block_indent|int|default(2)), width=999) | indent(dns_block_indent) }}
       {{ dns_block_end }}
 
 - name: Show generated DNS block
