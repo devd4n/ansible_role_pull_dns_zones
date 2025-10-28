@@ -19,7 +19,7 @@
 
 - name: Determine indentation of DNS block
   set_fact:
-    input : "{{ lookup('template', '/tmp/httpd.conf') }}"
+    input : "{{ lookup('template', inventory_file) }}"
 
 - name: Write indentation of DNS block to variable
   set_fact:    
