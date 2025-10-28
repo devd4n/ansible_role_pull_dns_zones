@@ -54,7 +54,7 @@
 
 - name: Show generated DNS block
   debug:
-    msg: "{{ dns_block | to_nice_yaml }}"
+    msg: "{{ dns_block | replace('\\n', '\n') }}"
 
 - name: Backup dns zone file
   copy:
