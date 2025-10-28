@@ -90,14 +90,14 @@
   set_fact:
     inventory_text: "{{ inventory_raw.content | b64decode }}"
 
-- name: Parse replaced inventory text into YAML
-  set_fact:
-    inventory_data: "{{ inventory_text | from_yaml }}"
+#- name: Parse replaced inventory text into YAML
+#  set_fact:
+#    inventory_data: "{{ inventory_text | from_yaml }}"
 
 - name: Write formatted inventory back to file
   copy:
     dest: "{{ inventory_file }}"
-    content: "{{ inventory_data | to_nice_yaml(indent=2, width=999) }}"
+    content: "{{ inventory_text | to_nice_yaml(indent=2, width=999) }}"
   diff: true
 
 - name: Insert DNS markers if missing
