@@ -39,7 +39,7 @@
 - name: Backup inventory manually
   copy:
     src: "{{ inventory_file }}"
-    dest: "{{ inventory_file }}.bak_{{ ansible_date_time.iso8601_basic }}"
+    dest: "{{ inventory_file }}.bak_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
     remote_src: yes
     
 - name: Replace DNS block in inventory file
