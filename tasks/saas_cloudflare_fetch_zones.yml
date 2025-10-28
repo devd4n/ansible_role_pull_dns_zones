@@ -2,6 +2,11 @@
   set_fact:
     all_cf_entries: []
 
+- name: Variablen aus Datei laden
+  include_vars:
+    file: dns_zones_file
+    name: dns_zones_file
+
 - name: Fetch Cloudflare Zone IDs
   uri:
     url: "{{ cloudflare_api_base }}?name={{ item.zone }}"
@@ -10,7 +15,7 @@
       Authorization: "Bearer {{ api_token }}"
       Content-Type: "application/json"
     return_content: yes
-  loop: "{{ dns_zones }}"
+  loop: "{{ dns_zones_file.dns_zones }}"
   loop_control:
     loop_var: item
   register: zone_info_results
