@@ -52,12 +52,50 @@
       {% endfor %}
       {{ dns_block_end }}
 
+- name: Backup inventory manually
+  copy:
+    src: "{{ inventory_file }}"
+    dest: "{{ inventory_file }}.bak_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+    remote_src: yes
+    
+
 - name: Replace DNS block in inventory file
   replace:
     path: "{{ inventory_file }}"
     regexp: "(?s){{ dns_block_start }}.*{{ dns_block_end }}"
     replace: "{{ dns_block }}"
 
-- name: Debug DNS block
+- name: Show generated DNS block
   debug:
     msg: "{{ dns_block }}"
+
+- name: Read current inventory file
+  slurp:
+    src: "{{ inventory_file }}"
+  register: inventory_raw
+
+- name: Decode inventory YAML into string
+  set_fact:
+    inventory_text: "{{ inventory_raw.content | b64decode }}"
+    
+- name: Replace only DNS block in the file
+  set_fact:
+    inventory_with_new_dns: >-
+      {{
+        inventory_text
+        | regex_replace(
+            '(?s)(' ~ dns_block_start ~ '.*?' ~ dns_block_end ~ ')',
+            dns_block
+          )
+      }
+
+- name: Parse replaced inventory text into YAML
+  set_fact:
+    inventory_data: "{{ inventory_with_new_dns | from_yaml }}"
+
+- name: Write formatted inventory back to file
+  copy:
+    dest: "{{ inventory_file }}"
+    content: "{{ inventory_data | to_nice_yaml(indent=2, width=999) }}"
+    backup: true
+  diff: true
