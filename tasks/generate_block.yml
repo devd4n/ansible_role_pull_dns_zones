@@ -47,7 +47,7 @@
         - zone: {{ zone.zone }}
           dns_entries:
       {% for entry in zone.dns_entries %}
-            - { name: "{{ entry.name }}", type: "{{ entry.type }}", value: "{{ entry.content }}" }
+            - { name: "{{ entry.name | replace('"', '') }}", type: "{{ entry.type | replace('"', '') }}", value: "{{ entry.content  | replace('"', '') }}" }
       {% endfor %}
       {% endfor %}
       {{ dns_block_end }}
