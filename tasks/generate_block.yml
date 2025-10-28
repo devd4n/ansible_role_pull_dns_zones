@@ -22,14 +22,14 @@
 
 - name: Determine indentation of DNS block safely 2
   set_fact:
-    dns_block_indent: "{{ indent_matches[0] | length if indent_matches | length > 0 else 0 }}"
+    dns_block_indent: "{{ indent_matches[0] | int if indent_matches | length > 0 else 0 }}"
 
 
 - name: Generate DNS YAML block with dynamic indentation
   set_fact:
     dns_block: |
       {{ dns_block_start }}
-      {{ cf_zones | to_nice_yaml(indent=dns_block_indent, width=999) | indent(dns_block_indent) }}
+      {{ cf_zones | to_nice_yaml(indent=(dns_block_indent|int|default(2)), width=999) | indent(dns_block_indent) }}
       {{ dns_block_end }}
 
 - name: Show generated DNS block
