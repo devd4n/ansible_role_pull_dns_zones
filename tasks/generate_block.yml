@@ -42,4 +42,3 @@
     regexp: "(?s){{ dns_block_start }}.*{{ dns_block_end }}"
     replace: "{{ dns_block }}"
     backup: true
-    diff: true
