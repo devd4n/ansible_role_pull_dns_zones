@@ -52,10 +52,6 @@
       {% endfor %}
       {{ dns_block_end }}
 
-- name: Show generated DNS block
-  debug:
-    msg: "{{ dns_block | replace('\\n', '\n') }}"
-
 - name: Backup dns zone file
   copy:
     src: "{{ dns_zones_file }}"
@@ -67,3 +63,7 @@
     path: "{{ dns_zones_file }}"
     regexp: "(?s){{ dns_block_start }}.*{{ dns_block_end }}"
     replace: "{{ dns_block }}"
+
+- name: Show generated DNS block
+  ansible.builtin.shell: |
+    echo "{{ dns_block }}"
