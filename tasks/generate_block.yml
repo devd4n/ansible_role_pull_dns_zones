@@ -69,6 +69,18 @@
   debug:
     msg: "{{ dns_block }}"
 
+- name: Remove (hashtag) BLOCK START
+  lineinfile:
+    path: "{{ inventory_file }}"
+    state: absent
+    regexp: '^# BLOCK START$'
+
+- name: Remove (hashtag) BLOCK END
+  lineinfile:
+    path: "{{ inventory_file }}"
+    state: absent
+    regexp: '^# BLOCK END$'
+
 - name: Read current inventory file
   slurp:
     src: "{{ inventory_file }}"
@@ -87,3 +99,22 @@
     dest: "{{ inventory_file }}"
     content: "{{ inventory_data | to_nice_yaml(indent=2, width=999) }}"
   diff: true
+
+  - name: Insert DNS markers if missing
+  shell: |
+    #!/bin/bash
+    file="{{ inventory_file }}"
+    # Insert START if missing
+    grep -q '# BLOCK START' "$file" || \
+    sed -i '/^\s*dns_zones:/a \ \ # BLOCK START' "$file"
+    # Insert END if missing: after last '- ' line under dns_zones, before next param
+    grep -q '# BLOCK END' "$file" || \
+    awk '
+    BEGIN {start_inserted=0}
+    /^\s*dns_zones:/ {in_block=1; print; next}
+    in_block && /^  - / {last_entry_line=NR}
+    in_block && /^[^ ]/ && last_entry_line {print prev_line; print "  # BLOCK END"; in_block=0; next}
+    {prev_line=$0; print}
+    END {
+      if(in_block && last_entry_line) print "  # BLOCK END"
+    }' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
