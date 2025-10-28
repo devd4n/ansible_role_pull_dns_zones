@@ -36,9 +36,14 @@
   debug:
     msg: "{{ dns_block }}"
 
+- name: Backup inventory manually
+  copy:
+    src: "{{ inventory_file }}"
+    dest: "{{ inventory_file }}.bak_{{ ansible_date_time.iso8601_basic }}"
+    remote_src: yes
+    
 - name: Replace DNS block in inventory file
   replace:
     path: "{{ inventory_file }}"
     regexp: "(?s){{ dns_block_start }}.*{{ dns_block_end }}"
     replace: "{{ dns_block }}"
-    backup: true
