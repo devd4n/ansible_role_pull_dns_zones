@@ -108,4 +108,4 @@
 
 - name: "Führe das Python-Skript aus, um die YAML-Datei korrekt zu formatieren"
   ansible.builtin.command: >
-    {{ script_path }} {{ inventory_file }} {{ inventory_file }
+    {{ script_path }} {{ inventory_file }} {{ inventory_file }}
