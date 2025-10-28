@@ -1,49 +1,63 @@
-- name: Read current inventory file
-  slurp:
-    src: "{{ inventory_file }}"
-  register: inventory_raw
-
-- name: Decode inventory file to string
-  set_fact:
-    inventory_text: "{{ inventory_raw.content | b64decode }}"
-
-#- name: Determine indentation of DNS block
+#- name: Read current inventory file
+#  slurp:
+#    src: "{{ inventory_file }}"
+#  register: inventory_raw
+#
+#- name: Decode inventory file to string
 #  set_fact:
-#    dns_block_indent: >-
-#      {{
-#        (inventory_text
-#         | regex_search('^([ \\t]*)' ~ dns_block_start, '\\1', multiline=True)
-#        ) | default('') | length
-#      }}
+#    inventory_text: "{{ inventory_raw.content | b64decode }}"
+#
+#- name: Determine indentation of DNS block safely
+#  set_fact:
+#    indent_matches: "{{ inventory_text | regex_findall('^([ \t]*)' ~ dns_block_start, multiline=True) }}"
+#
+#- name: Determine indentation of DNS block safely 2
+#  set_fact:
+#    dns_block_indent: "{{ indent_matches[0] | int if indent_matches | length > 0 else 0 }}"
+#
+#
+#- name: Generate DNS YAML block with dynamic indentation
+#  set_fact:
+#    dns_block: |
+#      {{ dns_block_start }}
+#      {{ all_cf_entries | to_nice_yaml(indent=(dns_block_indent|int|default(2)), width=999) | indent(dns_block_indent) }}
+#      {{ dns_block_end }}
+#
+#- name: Show generated DNS block
+#  debug:
+#    msg: "{{ dns_block }}"
+#
+#- name: Backup inventory manually
+#  copy:
+#    src: "{{ inventory_file }}"
+#    dest: "{{ inventory_file }}.bak_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+#    remote_src: yes
+#    
+#- name: Replace DNS block in inventory file
+#  replace:
+#    path: "{{ inventory_file }}"
+#    regexp: "(?s){{ dns_block_start }}.*{{ dns_block_end }}"
+#    replace: "{{ dns_block }}"
 
-- name: Determine indentation of DNS block safely
-  set_fact:
-    indent_matches: "{{ inventory_text | regex_findall('^([ \t]*)' ~ dns_block_start, multiline=True) }}"
-
-- name: Determine indentation of DNS block safely 2
-  set_fact:
-    dns_block_indent: "{{ indent_matches[0] | int if indent_matches | length > 0 else 0 }}"
-
-
-- name: Generate DNS YAML block with dynamic indentation
+- name: Generate DNS block from all_cf_entries
   set_fact:
     dns_block: |
       {{ dns_block_start }}
-      {{ all_cf_entries | to_nice_yaml(indent=(dns_block_indent|int|default(2)), width=999) | indent(dns_block_indent) }}
+      {% for zone in all_cf_entries %}
+      - zone: {{ zone.zone }}
+        dns_entries:
+      {% for entry in zone.dns_entries %}
+        - { name: "{{ entry.name }}", type: "{{ entry.type }}", value: "{{ entry.content }}" }
+      {% endfor %}
+      {% endfor %}
       {{ dns_block_end }}
 
-- name: Show generated DNS block
-  debug:
-    msg: "{{ dns_block }}"
-
-- name: Backup inventory manually
-  copy:
-    src: "{{ inventory_file }}"
-    dest: "{{ inventory_file }}.bak_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
-    remote_src: yes
-    
 - name: Replace DNS block in inventory file
   replace:
     path: "{{ inventory_file }}"
     regexp: "(?s){{ dns_block_start }}.*{{ dns_block_end }}"
     replace: "{{ dns_block }}"
+
+- name: Debug DNS block
+  debug:
+    msg: "{{ dns_block }}"
