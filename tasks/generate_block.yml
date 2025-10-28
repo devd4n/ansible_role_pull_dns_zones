@@ -73,13 +73,13 @@
   lineinfile:
     path: "{{ inventory_file }}"
     state: absent
-    regexp: '^# BLOCK START$'
+    regexp: '^# START SYNC DNS$'
 
 - name: Remove (hashtag) BLOCK END
   lineinfile:
     path: "{{ inventory_file }}"
     state: absent
-    regexp: '^# BLOCK END$'
+    regexp: '^# END SYNC DNS$'
 
 - name: "Installiere ruamel.yaml, falls noch nicht vorhanden"
   ansible.builtin.pip:
