@@ -54,13 +54,13 @@
 
 - name: Show generated DNS block
   debug:
-    msg: "{{ dns_block }}"
+    msg: "{{ dns_block | to_nice_yaml }}"
 
 - name: Backup dns zone file
   copy:
     src: "{{ dns_zones_file }}"
     dest: "{{ dns_zones_file }}.bak_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
-    remote_src: yes
+#    remote_src: yes
 
 - name: Replace DNS block in dns_zones file
   replace:
