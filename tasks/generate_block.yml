@@ -87,7 +87,7 @@
             '(?s)(' ~ dns_block_start ~ '.*?' ~ dns_block_end ~ ')',
             dns_block
           )
-      }
+      }}
 
 - name: Parse replaced inventory text into YAML
   set_fact:
