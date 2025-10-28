@@ -1,6 +1,6 @@
 #- name: Read current inventory file
 #  slurp:
-#    src: "{{ inventory_file }}"
+#    src: "{{ dns_zones_file }}"
 #  register: inventory_raw
 #
 #- name: Decode inventory file to string
@@ -29,13 +29,13 @@
 #
 #- name: Backup inventory manually
 #  copy:
-#    src: "{{ inventory_file }}"
-#    dest: "{{ inventory_file }}.bak_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+#    src: "{{ dns_zones_file }}"
+#    dest: "{{ dns_zones_file }}.bak_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
 #    remote_src: yes
 #    
 #- name: Replace DNS block in inventory file
 #  replace:
-#    path: "{{ inventory_file }}"
+#    path: "{{ dns_zones_file }}"
 #    regexp: "(?s){{ dns_block_start }}.*{{ dns_block_end }}"
 #    replace: "{{ dns_block }}"
 
@@ -52,60 +52,18 @@
       {% endfor %}
       {{ dns_block_end }}
 
-- name: Backup inventory manually
-  copy:
-    src: "{{ inventory_file }}"
-    dest: "{{ inventory_file }}.bak_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
-    remote_src: yes
-    
-
-- name: Replace DNS block in inventory file
-  replace:
-    path: "{{ inventory_file }}"
-    regexp: "(?s){{ dns_block_start }}.*{{ dns_block_end }}"
-    replace: "{{ dns_block }}"
-
 - name: Show generated DNS block
   debug:
     msg: "{{ dns_block }}"
 
-- name: Remove (hashtag) BLOCK 
-  lineinfile:
-    path: "{{ inventory_file }}"
-    state: absent
-    regexp: '^# START SYNC DNS$'
+- name: Backup dns zone file
+  copy:
+    src: "{{ dns_zones_file }}"
+    dest: "{{ dns_zones_file }}.bak_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+    remote_src: yes
 
-- name: Remove (hashtag) BLOCK END
-  lineinfile:
-    path: "{{ inventory_file }}"
-    state: absent
-    regexp: '^# END SYNC DNS$'
-
-- name: "Installiere ruamel.yaml, falls noch nicht vorhanden"
-  ansible.builtin.pip:
-    name: ruamel.yaml
-    state: present
-
-- name: script path
-  set_fact:
-    script_path: "/tmp/fix_yaml.py"
-- name: "Lege Python-Skript zum Korrigieren der YAML-Datei ab"
-  ansible.builtin.copy:
-    dest: "{{ script_path }}"
-    content: |
-      #!/usr/bin/env python3
-      import sys
-      from ruamel.yaml import YAML
-      yaml = YAML()
-      yaml.preserve_quotes = True
-      input_file = sys.argv[1]
-      output_file = sys.argv[2]
-      with open(input_file, 'r') as f:
-          data = yaml.load(f)
-      with open(output_file, 'w') as f:
-          yaml.dump(data, f)
-    mode: '0755'
-
-- name: "Führe das Python-Skript aus, um die YAML-Datei korrekt zu formatieren"
-  ansible.builtin.command: >
-    {{ script_path }} {{ inventory_file }} {{ inventory_file }}
+- name: Replace DNS block in dns_zones file
+  replace:
+    path: "{{ dns_zones_file }}"
+    regexp: "(?s){{ dns_block_start }}.*{{ dns_block_end }}"
+    replace: "{{ dns_block }}"
