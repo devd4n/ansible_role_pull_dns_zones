@@ -81,40 +81,28 @@
     state: absent
     regexp: '^# BLOCK END$'
 
-- name: Read current inventory file
-  slurp:
-    src: "{{ inventory_file }}"
-  register: inventory_raw
+- name: "Installiere ruamel.yaml, falls noch nicht vorhanden"
+  ansible.builtin.pip:
+    name: ruamel.yaml
+    state: present
 
-- name: Decode inventory YAML into string
-  set_fact:
-    inventory_text: "{{ inventory_raw.content | b64decode }}"
+- name: "Lege Python-Skript zum Korrigieren der YAML-Datei ab"
+  ansible.builtin.copy:
+    dest: "{{ script_path }}"
+    content: |
+      #!/usr/bin/env python3
+      import sys
+      from ruamel.yaml import YAM
+      yaml = YAML()
+      yaml.preserve_quotes = Tru
+      input_file = sys.argv[1]
+      output_file = sys.argv[2
+      with open(input_file, 'r') as f:
+          data = yaml.load(f
+      with open(output_file, 'w') as f:
+          yaml.dump(data, f)
+    mode: '0755'
 
-#- name: Parse replaced inventory text into YAML
-#  set_fact:
-#    inventory_data: "{{ inventory_text | from_yaml }}"
-
-- name: Write formatted inventory back to file
-  copy:
-    dest: "{{ inventory_file }}"
-    content: "{{ inventory_text | to_nice_yaml(indent=2, width=999) }}"
-  diff: true
-
-- name: Insert DNS markers if missing
-  shell: |
-    #!/bin/bash
-    file="{{ inventory_file }}"
-    # Insert START if missing
-    grep -q '# BLOCK START' "$file" || \
-    sed -i '/^\s*dns_zones:/a \ \ # BLOCK START' "$file"
-    # Insert END if missing: after last '- ' line under dns_zones, before next param
-    grep -q '# BLOCK END' "$file" || \
-    awk '
-    BEGIN {start_inserted=0}
-    /^\s*dns_zones:/ {in_block=1; print; next}
-    in_block && /^  - / {last_entry_line=NR}
-    in_block && /^[^ ]/ && last_entry_line {print prev_line; print "  # BLOCK END"; in_block=0; next}
-    {prev_line=$0; print}
-    END {
-      if(in_block && last_entry_line) print "  # BLOCK END"
-    }' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+- name: "Führe das Python-Skript aus, um die YAML-Datei korrekt zu formatieren"
+  ansible.builtin.command: >
+    {{ script_path }} {{ inventory_file }} {{ inventory_file }
