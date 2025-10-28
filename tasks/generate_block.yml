@@ -77,17 +77,6 @@
 - name: Decode inventory YAML into string
   set_fact:
     inventory_text: "{{ inventory_raw.content | b64decode }}"
-    
-- name: Replace only DNS block in the file
-  set_fact:
-    inventory_with_new_dns: >-
-      {{
-        inventory_text
-        | regex_replace(
-            '(?s)(' ~ dns_block_start ~ '.*?' ~ dns_block_end ~ ')',
-            dns_block
-          )
-      }}
 
 - name: Parse replaced inventory text into YAML
   set_fact:
@@ -97,5 +86,4 @@
   copy:
     dest: "{{ inventory_file }}"
     content: "{{ inventory_data | to_nice_yaml(indent=2, width=999) }}"
-    backup: true
   diff: true
