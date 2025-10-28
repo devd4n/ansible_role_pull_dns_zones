@@ -7,19 +7,13 @@
   set_fact:
     inventory_text: "{{ inventory_raw.content | b64decode }}"
 
-# --- create regex-escaped versions to avoid special-character problems ---
-- name: Escape markers for regex usage
-  set_fact:
-    dns_block_start_esc: "{{ dns_block_start | regex_escape }}"
-    dns_block_end_esc:   "{{ dns_block_end   | regex_escape }}"
-
 - name: Determine indentation of DNS block
   set_fact:
     dns_block_indent: >-
       {{
         (inventory_text
-         | regex_search('^([ \\t]*)' ~ dns_block_start_esc, '\\1', multiline=True)
-        ) | length
+         | regex_search('^([ \\t]*)' ~ dns_block_start, '\\1', multiline=True)
+        ) | default('') | length
       }}
 
 - name: Generate DNS YAML block with dynamic indentation
