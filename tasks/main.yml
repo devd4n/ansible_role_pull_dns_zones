@@ -1,10 +1,30 @@
 ---
-# tasks file for ansible_role_pull_dns_zones
+# tasks file for ansible_role_pull_dns_zones#
+- name: Initialize all Cloudflare entries lists
+  set_fact:
+    cf_zones_all_local: []
+    cf_zones_all_remote: []
+    
+- name: Include Cloudflare load vars from dns zone file
+  include_tasks: "{{ role_path }}/tasks/load_vars_from_dns_zone_file.yml"
 
-- name: Include Cloudflare fetch tasks
-  include_tasks: "{{ role_path }}/tasks/saas_cloudflare_fetch_zones.yml"
-  when: dns_provider == "cloudflare"
+- name: Include Cloudflare fetch_defined_zones tasks
+  include_tasks: "{{ role_path }}/tasks/cloudflare_saas/cloudflare_saas_fetch_all.yml"
 
-- name: Generate DNS block and update inventory
-  include_tasks: "{{ role_path }}/tasks/generate_block.yml"
+- name: print cf_zones_all_local
+  debug:
+    var: cf_zones_all_local
+
+- name: print cf_zones_all_remote
+  debug:
+    var: cf_zones_all_remote
+
+#- name: Include Cloudflare fetch_defined_zones tasks
+#  include_tasks: "{{ role_path }}/tasks/cloudflare_saas/saas_cloudflare_fetch_defined_zones.yml"
+#  when:
+#    - dns_zone_sync_provider == "cloudflare"
+#    - dns_zone_sync_mode in ["fetch_defined_zones"]
+#
+#- name: Generate DNS block and update inventory
+#  include_tasks: "{{ role_path }}/tasks/generate_block.yml"
 

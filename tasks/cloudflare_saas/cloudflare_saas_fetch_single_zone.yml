@@ -19,6 +19,6 @@
   set_fact:
     cf_entries: "{{ cf_entries + page_results.results | map(attribute='json.result') | sum(start=[]) }}"
 
-- name: Add zone records to all_cf_entries
+- name: Add zone records to cf_zones_all_remote
   set_fact:
-    all_cf_entries: "{{ all_cf_entries + [ { 'zone': zone_name, 'dns_entries': cf_entries } ] }}"
+    cf_zones_all_remote: "{{ cf_zones_all_remote + [ { 'zone': zone_name, 'dns_entries': cf_entries } ] }}"

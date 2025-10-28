@@ -1,0 +1,9 @@
+- name: Loop over all zones
+  loop: "{{ dns_zones }}"
+  loop_control:
+    loop_var: zone_item
+  vars:
+    dns_zone: "{{ zone_item.zone }}"
+    dns_entries: "{{ zone_item.dns_entries | default([]) }}"
+    cloudflare_api_token: "{{ api_token }}"
+  include_tasks: cloudflare_saas_overwrite_entries_for_single_zone.yml

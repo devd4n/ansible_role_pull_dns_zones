@@ -2,10 +2,11 @@
 # defaults file for ansible_role_pull_dns_zones
 
 per_page: 100
+dns_zone_sync_mode: "fetch_defined_zones"                    # supported: fetch_defined_zones; not supported yet: overwrite_all|overwrite_defined|fetch_all|fetch_defined
 dns_zones_file: "/path/to/your/inventory.yml"
 cloudflare_api_base: "https://api.cloudflare.com/client/v4/zones"
 dns_block_start: "# START SYNC DNS"
 dns_block_end: "# END SYNC DNS"
-dns_provider: "cloudflare"  # Standard: cloudflare
+dns_zone_sync_provider: "cloudflare"  # Standard: cloudflare
 api_token: ""
 max_pages: 10  # maximale Seiten pro Zone

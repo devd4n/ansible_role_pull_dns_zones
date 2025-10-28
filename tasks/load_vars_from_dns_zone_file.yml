@@ -1,0 +1,8 @@
+- name: load vars from file
+  include_vars:
+    file: "{{ dns_zones_file }}"
+    name: dns_zones_file_content
+
+- name: load vars from file and write to variable
+  set_fact:
+    cf_zones_all_local: "{{ dns_zones_file_content.dns_zones }}"

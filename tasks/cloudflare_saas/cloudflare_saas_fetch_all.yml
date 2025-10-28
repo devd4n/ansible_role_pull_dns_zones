@@ -1,0 +1,39 @@
+- name: Get all cloudflare zones (names)
+  uri:
+    url: "https://api.cloudflare.com/client/v4/zones"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ api_token }}"
+      Content-Type: "application/json"
+    return_content: yes
+  register: zone_results
+
+- name: Convert Cloudflare JSON to YAML-friendly variable
+  set_fact:
+    result_dns_zones: "{{ zone_results.json.result | map(attribute='name') | list }}"
+
+- name: Debug Cloudflare zones
+  debug:
+    var: result_dns_zones
+
+- name: Fetch Cloudflare Zone IDs
+  uri:
+    url: "{{ cloudflare_api_base }}?name={{ item.zone }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ api_token }}"
+      Content-Type: "application/json"
+    return_content: yes
+  loop: "{{ result_dns_zones }}"
+  loop_control:
+    loop_var: item
+  register: zone_info_results
+
+- name: Fetch DNS records per zone (loop via include_tasks)
+  include_tasks: "{{ role_path }}/tasks/saas_cloudflare_fetch_single_zone.yml"
+  loop: "{{ zone_info_results.results }}"
+  loop_control:
+    loop_var: zone_item
+  vars:
+    zone_id: "{{ zone_item.json.result[0].id }}"
+    zone_name: "{{ zone_item.item.zone }}"
