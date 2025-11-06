@@ -19,6 +19,8 @@
   set_fact:
     dns_entries: "{{ dns_entries + page_results.results | map(attribute='json.result') | sum(start=[]) }}"
 
-- name: Add zone records to dns_zones_all_remote
+- name: Build single zone object
   set_fact:
-    dns_zones_all_remote: "{{ dns_zones_all_remote | default([]) + [ { 'zone_id': zone_id, 'zone_name': zone_name } ] }}"
+    dns_zone_single:
+      zone: "{{ zone_name }}"
+      dns_entries: "{{ dns_entries }}"
