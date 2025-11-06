@@ -43,7 +43,3 @@
     zone_name: "{{ zone_item.item }}"
     dns_zones_all_remote: []
   register: dns_zone_results
-
-- name: Debug Cloudflare zones
-  debug:
-    var: dns_zones_all_remote
