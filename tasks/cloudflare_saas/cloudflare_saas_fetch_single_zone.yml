@@ -19,12 +19,10 @@
   set_fact:
     dns_entries: "{{ dns_entries + page_results.results | map(attribute='json.result') | sum(start=[]) }}"
 
-- name: Build single zone object
+- name: debug
   set_fact:
-    dns_zone_single:
-      zone: "{{ zone_name }}"
-      dns_entries: "{{ dns_entries }}"
+    dns_zones_all_remote: "{{ dns_zones_all_remote + [ {'zone': zone_name, 'dns_entries': dns_entries} ] }}"
 
-- name: Debug single zone
+- name: Debug
   debug:
-    var: dns_zone_single
+    var: dns_zones_all_remote

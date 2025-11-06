@@ -41,12 +41,9 @@
   vars:
     zone_id: "{{ zone_item.json.result[0].id }}"
     zone_name: "{{ zone_item.item }}"
+    dns_zones_all_remote: []
   register: dns_zone_results
 
 - name: Debug Cloudflare zones
   debug:
-    var: dns_zone_results
-
-- name: Combine all zone records into dns_zones_all_remote
-  set_fact:
-    dns_zones_all_remote: "{{ dns_zone_results.results | map(attribute='dns_zone_single') | list }}"
+    var: dns_zones_all_remote

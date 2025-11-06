@@ -1,25 +1,27 @@
 ---
 # tasks file for ansible_role_pull_dns_zones#
-- name: Initialize all Cloudflare entries lists
+- name: Initialize all dns entries lists
   set_fact:
-    cf_zones_all_local: []
-    cf_zones_all_remote: []
+    dns_zones_all_local: []
+    dns_zones_all_remote: []
     
-- name: Include Cloudflare load vars from dns zone file
+- name: Include DNS load vars from dns zone file
   include_tasks: "{{ role_path }}/tasks/load_vars_from_dns_zone_file.yml"
 
-- name: Include Cloudflare fetch_defined_zones tasks
+- name: Include DNS fetch_defined_zones tasks
+  vars:
+    dns_zones_all_remote: []
   include_tasks: "{{ role_path }}/tasks/cloudflare_saas/cloudflare_saas_fetch_all.yml"
 
-- name: print cf_zones_all_local
+- name: print dns_zones_all_local
   debug:
-    var: cf_zones_all_local
+    var: dns_zones_all_local
 
-- name: print cf_zones_all_remote
+- name: print dns_zones_all_remote
   debug:
-    var: cf_zones_all_remote
+    var: dns_zones_all_remote
 
-#- name: Include Cloudflare fetch_defined_zones tasks
+#- name: Include DNS fetch_defined_zones tasks
 #  include_tasks: "{{ role_path }}/tasks/cloudflare_saas/saas_cloudflare_fetch_defined_zones.yml"
 #  when:
 #    - dns_zone_sync_provider == "cloudflare"
