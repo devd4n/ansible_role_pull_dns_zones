@@ -22,6 +22,9 @@
   debug:
     var: dns_zones_all_remote
 
+- name: set new dns file content
+  set_fact:
+    all_dns_zones: dns_zones_all_remote
 
 - name: Generate DNS block and update inventory
   include_tasks: "{{ role_path }}/tasks/generate_block.yml"
