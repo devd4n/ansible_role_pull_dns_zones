@@ -24,3 +24,7 @@
     dns_zone_single:
       zone: "{{ zone_name }}"
       dns_entries: "{{ dns_entries }}"
+
+- name: Debug single zone
+  debug:
+    var: dns_zone_single
