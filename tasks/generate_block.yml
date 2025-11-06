@@ -20,7 +20,7 @@
 #  set_fact:
 #    dns_block: |
 #      {{ dns_block_start }}
-#      {{ all_cf_entries | to_nice_yaml(indent=(dns_block_indent|int|default(2)), width=999) | indent(dns_block_indent) }}
+#      {{ all_dns_entries | to_nice_yaml(indent=(dns_block_indent|int|default(2)), width=999) | indent(dns_block_indent) }}
 #      {{ dns_block_end }}
 #
 #- name: Show generated DNS block
@@ -39,11 +39,11 @@
 #    regexp: "(?s){{ dns_block_start }}.*{{ dns_block_end }}"
 #    replace: "{{ dns_block }}"
 
-- name: Generate DNS block from all_cf_entries
+- name: Generate DNS block from all_dns_entries
   set_fact:
     dns_block: |
       {{ dns_block_start }}
-      {% for zone in all_cf_entries %}
+      {% for zone in all_dns_entries %}
         - zone: {{ zone.zone }}
           dns_entries:
       {% for entry in zone.dns_entries %}
