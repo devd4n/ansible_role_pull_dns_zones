@@ -4,6 +4,7 @@
   set_fact:
     dns_zones_all_local: []
     dns_zones_all_remote: []
+    all_dns_zones: []
     
 - name: Include DNS load vars from dns zone file
   include_tasks: "{{ role_path }}/tasks/load_vars_from_dns_zone_file.yml"
@@ -20,6 +21,7 @@
 - name: print dns_zones_all_remote
   debug:
     var: dns_zones_all_remote
+
 
 - name: Generate DNS block and update inventory
   include_tasks: "{{ role_path }}/tasks/generate_block.yml"
