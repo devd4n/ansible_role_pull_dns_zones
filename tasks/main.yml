@@ -21,12 +21,6 @@
   debug:
     var: dns_zones_all_remote
 
-#- name: Include DNS fetch_defined_zones tasks
-#  include_tasks: "{{ role_path }}/tasks/cloudflare_saas/saas_cloudflare_fetch_defined_zones.yml"
-#  when:
-#    - dns_zone_sync_provider == "cloudflare"
-#    - dns_zone_sync_mode in ["fetch_defined_zones"]
-#
-#- name: Generate DNS block and update inventory
-#  include_tasks: "{{ role_path }}/tasks/generate_block.yml"
+- name: Generate DNS block and update inventory
+  include_tasks: "{{ role_path }}/tasks/generate_block.yml"
 
