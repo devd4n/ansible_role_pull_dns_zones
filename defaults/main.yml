@@ -1,12 +1,55 @@
 ---
 # defaults file for ansible_role_pull_dns_zones
 
-per_page: 100
+####################################################################################################
+# Cloudflare DNS Zone Synchronization Modes
+#
+# The variable `dns_sync_mode` controls how local DNS zone definitions and remote Cloudflare
+# DNS zone data are merged. Each mode defines a specific strategy for handling differences
+# between local and remote DNS entries.
+#
+# ─────────────────────────────────────────────────────────────────────────────────────────────────
+#  Mode: fetch_prefer_local
+#   • Merges all zones and DNS entries from both local and remote sources.
+#   • If a record exists in both, the local record takes precedence.
+#   • Useful for keeping all data but preferring local overrides.
+#
+#  Mode: fetch_prefer_remote
+#   • Merges all zones and DNS entries from both local and remote sources.
+#   • If a record exists in both, the remote record takes precedence.
+#   • Useful when remote data should override local definitions.
+#
+#  Mode: fetch_defined_entries_prefer_local
+#   • Includes only DNS entries that exist in both local and remote definitions.
+#   • If a record exists in both, the local version is preferred.
+#   • Useful for syncing only overlapping entries, keeping local values.
+#
+#  Mode: fetch_defined_entries_prefer_remote
+#   • Includes only DNS entries that exist in both local and remote definitions.
+#   • If a record exists in both, the remote version is preferred.
+#   • Useful for syncing only overlapping entries, keeping remote values.
+#
+#  Mode: fetch_defined_zones_prefer_local
+#   • Includes only zones that exist locally (zones not defined locally are ignored).
+#   • For these zones, merge all DNS entries from local and remote.
+#   • If a record exists in both, the local record takes precedence.
+#   • Useful when you want to sync only specific zones under local control.
+#
+#  Mode: fetch_defined_zones_prefer_remote
+#   • Includes only zones that exist locally (zones not defined locally are ignored).
+#   • For these zones, merge all DNS entries from local and remote.
+#   • If a record exists in both, the remote record takes precedence.
+#   • Useful when you want to sync specific zones but keep remote as authoritative.
+#
+####################################################################################################
+
 dns_zone_sync_mode: "fetch_defined_zones"                    # supported: fetch_defined_zones; not supported yet: overwrite_all|overwrite_defined|fetch_all|fetch_defined
 dns_zones_file: "/path/to/your/inventory.yml"
-cloudflare_api_base: "https://api.cloudflare.com/client/v4/zones"
 dns_block_start: "# START SYNC DNS"
 dns_block_end: "# END SYNC DNS"
 dns_zone_sync_provider: "cloudflare"  # Standard: cloudflare
 api_token: ""
-max_pages: 10  # maximale Seiten pro Zone
+
+cloudflare_api_base: "https://api.cloudflare.com/client/v4/zones"
+cloudflare_max_pages: 10  # maximale Seiten pro Zone
+cloudflare_per_page: 100

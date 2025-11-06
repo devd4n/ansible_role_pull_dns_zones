@@ -1,24 +1,24 @@
-- name: Initialize cf_entries for this zone
+- name: Initialize dns_entries for this zone
   set_fact:
-    cf_entries: []
+    dns_entries: []
 
 - name: Fetch DNS records page by page
   uri:
-    url: "{{ cloudflare_api_base }}/{{ zone_id }}/dns_records?per_page={{ per_page }}&page={{ item }}"
+    url: "{{ cloudflare_api_base }}/{{ zone_id }}/dns_records?per_page={{ cloudflare_per_page }}&page={{ item }}"
     method: GET
     headers:
       Authorization: "Bearer {{ api_token }}"
       Content-Type: "application/json"
     return_content: yes
-  loop: "{{ range(1, max_pages + 1) | list }}"
+  loop: "{{ range(1, cloudflare_max_pages + 1) | list }}"
   loop_control:
     loop_var: item
   register: page_results
 
-- name: Append page results to cf_entries
+- name: Append page results to dns_entries
   set_fact:
-    cf_entries: "{{ cf_entries + page_results.results | map(attribute='json.result') | sum(start=[]) }}"
+    dns_entries: "{{ dns_entries + page_results.results | map(attribute='json.result') | sum(start=[]) }}"
 
-- name: Add zone records to cf_zones_all_remote
+- name: Add zone records to dns_zones_all_remote
   set_fact:
-    cf_zones_all_remote: "{{ cf_zones_all_remote + [ { 'zone': zone_name, 'dns_entries': cf_entries } ] }}"
+    dns_zones_all_remote: "{{ dns_zones_all_remote + [ { 'zone': zone_name, 'dns_entries': dns_entries } ] }}"
