@@ -41,3 +41,4 @@
   vars:
     zone_id: "{{ zone_item.json.result[0].id }}"
     zone_name: "{{ zone_item.item }}"
+    dns_zones_all_remote: "{{ dns_zones_all_remote }}"
