@@ -57,4 +57,12 @@
 
 - name: Combine all zone JSON files into one list
   set_fact:
-    dns_zones_all_remote: "{{ tmp_zone_files.files | map(attribute='path') | map('file', read_json) | list }}"
+    dns_zones_all_remote: >-
+      {{
+        tmp_zone_files.files
+        | map(attribute='path')
+        | map('lookup', 'file')       # Dateiinhalt als String
+        | map('from_json')            # konvertiere JSON-Array zu Liste
+        | sum(start=[])               # alle Arrays zusammenführen
+      }}
+  run_once: true
