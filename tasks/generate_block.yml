@@ -65,5 +65,5 @@
     replace: "{{ dns_block }}"
 
 - name: Show generated DNS block
-  ansible.builtin.shell: |
-    echo "{{ dns_block }}"
+  debug:
+    var: dns_block

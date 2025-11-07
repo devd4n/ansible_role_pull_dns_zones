@@ -25,5 +25,5 @@
 
 - name: Write zone data to temporary file
   copy:
-    dest: "{{ dns_zones_file | dirname }}/{{ zone_name }}.json"
+    dest: "{{ dns_zones_file | dirname }}/tmp_{{ zone_name }}.json"
     content: "{{ dns_zone_single | to_nice_json }}"

@@ -52,7 +52,7 @@
 - name: Gather temporary zone files
   find:
     paths: "{{ dns_zones_file | dirname }}"
-    patterns: "*.json"
+    patterns: "tmp_*.json"
   register: tmp_zone_files
 
 - name: Read each temporary zone JSON file
@@ -60,15 +60,8 @@
     dns_zones_all_remote: "{{ dns_zones_all_remote + (lookup('file', item.path) | from_json) }}"
   loop: "{{ tmp_zone_files.files }}"
 
-#- name: Read each temporary zone JSON file
-#  set_fact:
-#    zone_json: "{{ lookup('file', item.path) | from_json }}"
-#  loop: "{{ tmp_zone_files.files }}"
-#  register: zone_json_results
-#
-#- name: Combine all zones into one list
-#  set_fact:
-#    dns_zones_all_remote: "{{ dns_zones_all_remote + item }}"
-#  loop: "{{ zone_json_results.results }}"
-#  loop_control:
-#    loop_var: item
+- name: Delete temporary zone JSON files
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ tmp_zone_files.files }}"
