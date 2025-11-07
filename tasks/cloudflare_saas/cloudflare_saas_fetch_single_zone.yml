@@ -23,6 +23,7 @@
   set_fact:
     dns_zone_single: "{{ [ {'zone': zone_name, 'dns_entries': dns_entries} ] }}"
 
-- name: Append this zone to global dns_zones_all_remote
-  set_fact:
-    dns_zones_all_remote: "{{ dns_zones_all_remote + [dns_zone_single] }}"
+- name: Write zone data to temporary file
+  copy:
+    dest: "{{ dns_zones_file | dirname }}/{{ zone_name }}.json"
+    content: "{{ dns_zone_single | to_nice_json }}"
