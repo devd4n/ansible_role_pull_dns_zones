@@ -49,20 +49,17 @@
     #dns_zones_all_remote: "{{ dns_zone_single }}"
   register: dns_zone_results
 
-- name: Gather temporary zone files
-  find:
-    paths: "{{ dns_zones_file | dirname }}"
-    patterns: "*.json"
-  register: tmp_zone_files
+- name: Read each temporary zone JSON file and append
+  ansible.builtin.read_json:
+    path: "{{ item.path }}"
+  loop: "{{ tmp_zone_files.files }}"
+  loop_control:
+    loop_var: item
+  register: zone_json_results
 
-- name: Combine all zone JSON files into one list
+- name: Combine all zones into one list
   set_fact:
-    dns_zones_all_remote: >-
-      {{
-        tmp_zone_files.files
-        | map(attribute='path')
-        | map('lookup', 'file')       
-        | map('from_json')
-        | sum(start=[])
-      }}
-  run_once: true
+    dns_zones_all_remote: "{{ dns_zones_all_remote + item }}"
+  loop: "{{ zone_json_results.results }}"
+  loop_control:
+    loop_var: item
