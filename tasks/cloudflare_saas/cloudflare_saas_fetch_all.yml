@@ -61,8 +61,8 @@
       {{
         tmp_zone_files.files
         | map(attribute='path')
-        | map('lookup', 'file')       # Dateiinhalt als String
-        | map('from_json')            # konvertiere JSON-Array zu Liste
-        | sum(start=[])               # alle Arrays zusammenführen
+        | map('lookup', 'file')       
+        | map('from_json')
+        | sum(start=[])
       }}
   run_once: true
