@@ -1,3 +1,8 @@
+- name: Initialize all dns entries lists
+  set_fact:
+    dns_zones_all_local: []
+    dns_zones_all_remote: []
+
 - name: Get all cloudflare zones (names)
   uri:
     url: "https://api.cloudflare.com/client/v4/zones"
