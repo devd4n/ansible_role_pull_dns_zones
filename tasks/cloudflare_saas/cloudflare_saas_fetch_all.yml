@@ -55,12 +55,10 @@
     patterns: "*.json"
   register: tmp_zone_files
 
-- name: Read each temporary zone JSON file and append
-  ansible.builtin.read_json:
-    path: "{{ item.path }}"
-  loop: "{{ tmp_zone_files.files }}"
-  loop_control:
-    loop_var: item
+- name: Read each temporary zone JSON file
+  set_fact:
+    zone_json: "{{ lookup('file', item.path) | from_json }}"
+  loop: "{{ temp_zone_files.files }}"
   register: zone_json_results
 
 - name: Combine all zones into one list
