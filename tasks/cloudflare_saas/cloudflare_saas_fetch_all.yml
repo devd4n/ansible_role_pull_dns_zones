@@ -51,7 +51,7 @@
 
 - name: Gather temporary zone files
   find:
-    paths: {{ dns_zones_file | dirname }}
+    paths: "{{ dns_zones_file | dirname }}"
     patterns: "*.json"
   register: tmp_zone_files
 
